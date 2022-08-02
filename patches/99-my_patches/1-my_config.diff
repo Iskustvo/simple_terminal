@@ -1,0 +1,117 @@
+diff --git a/config.def.h b/config.def.h
+index 91ab8ca..da383c9 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -5,8 +5,8 @@
+  *
+  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
+  */
+-static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
+-static int borderpx = 2;
++static char *font = "DroidSansMono Nerd Font:pixelsize=16:antialias=true:autohint=true";
++static int borderpx = 0;
+ 
+ /*
+  * What program is execed by st depends of these precedence rules:
+@@ -60,7 +60,7 @@ static double maxlatency = 33;
+  * blinking timeout (set to 0 to disable blinking) for the terminal blinking
+  * attribute.
+  */
+-static unsigned int blinktimeout = 800;
++static unsigned int blinktimeout = 0;
+ 
+ /*
+  * thickness of underline and bar cursors
+@@ -91,37 +91,34 @@ char *termname = "st-256color";
+  *
+  *	stty tabs
+  */
+-unsigned int tabspaces = 8;
++unsigned int tabspaces = 4;
+ 
+ /* Terminal colors (16 first used in escape sequence) */
+ static const char *colorname[] = {
+ 	/* 8 normal colors */
+-	"black",
+-	"red3",
+-	"green3",
+-	"yellow3",
+-	"blue2",
+-	"magenta3",
+-	"cyan3",
+-	"gray90",
++	"#1e1e1e", // black
++	"#f44747", // red
++	"#608b4e", // green
++	"#dcdcaa", // yellow
++	"#569cd6", // blue
++	"#c678dd", // magenta
++	"#56b6c2", // cyan
++	"#d4d4d4", // white
+ 
+ 	/* 8 bright colors */
+-	"gray50",
+-	"red",
+-	"green",
+-	"yellow",
+-	"#5c5cff",
+-	"magenta",
+-	"cyan",
+-	"white",
++	"#545454", // black
++	"#f44747", // red
++	"#608b4e", // green
++	"#dcdcaa", // yellow
++	"#569cd6", // blue
++	"#c678dd", // magenta
++	"#56b6c2", // cyan
++	"#d4d4d4", // white
+ 
+ 	[255] = 0,
+ 
+ 	/* more colors can be added after 255 to use with DefaultXX */
+-	"#cccccc",
+-	"#555555",
+-	"gray90", /* default foreground colour */
+-	"black", /* default background colour */
++	"#555555", // TODO: Check if this is desired | Reverse cursor color - cursor color when highlighted by mouse.
+ };
+ 
+ 
+@@ -129,10 +126,10 @@ static const char *colorname[] = {
+  * Default colors (colorname index)
+  * foreground, background, cursor, reverse cursor
+  */
+-unsigned int defaultfg = 258;
+-unsigned int defaultbg = 259;
+-unsigned int defaultcs = 256;
+-static unsigned int defaultrcs = 257;
++unsigned int defaultbg = 0;
++unsigned int defaultfg = 7;
++unsigned int defaultcs = 7;
++static unsigned int defaultrcs = 256;
+ 
+ /*
+  * Default shape of cursor
+@@ -141,7 +138,7 @@ static unsigned int defaultrcs = 257;
+  * 6: Bar ("|")
+  * 7: Snowman ("☃")
+  */
+-static unsigned int cursorshape = 2;
++static unsigned int cursorshape = 6;
+ 
+ /*
+  * Default columns and rows numbers
+diff --git a/st.info b/st.info
+index 8201ad6..e2ab6c1 100644
+--- a/st.info
++++ b/st.info
+@@ -47,7 +47,7 @@ st-mono| simpleterm monocolor,
+ 	indn=\E[%p1%dS,
+ 	invis=\E[8m,
+ 	is2=\E[4l\E>\E[?1034l,
+-	it#8,
++	it#4,
+ 	kel=\E[1;2F,
+ 	ked=\E[1;5F,
+ 	ka1=\E[1~,
