@@ -1,10 +1,12 @@
 UPSTREAM_DIR = $(shell realpath st)
 PATCHES = $(shell find "$$(realpath patches)" -type f | sort)
 
-.PHONY: all patch clean
+.PHONY: all st patch clean
 
-all: patch
-	@echo "Building"
+all: st
+
+st: patch
+	@echo "Building simple terminal"
 	@$(MAKE) -C $(UPSTREAM_DIR)
 
 patch: clean
