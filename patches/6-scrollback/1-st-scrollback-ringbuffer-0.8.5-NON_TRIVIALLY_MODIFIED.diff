@@ -1,5 +1,5 @@
 diff --git a/config.def.h b/config.def.h
-index dd35178..358f885 100644
+index 6185e96..bb15c28 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -204,6 +204,8 @@ static Shortcut shortcuts[] = {
@@ -12,7 +12,7 @@ index dd35178..358f885 100644
  
  /*
 diff --git a/st.c b/st.c
-index 91243c2..94be87d 100644
+index fc582b3..63f1671 100644
 --- a/st.c
 +++ b/st.c
 @@ -45,6 +45,10 @@ extern char *argv0;
@@ -299,15 +299,16 @@ index 91243c2..94be87d 100644
  
 -	tsetdirt(orig, term.bot-n);
 -	tclearregion(0, term.bot-n+1, term.col-1, term.bot);
-+	/* Ensure that lines are allocated */
-+	for (i = -n; i < 0; i++) {
-+		TLINE(i) = ensureline(TLINE(i));
-+	}
- 
+-
 -	for (i = term.bot; i >= orig+n; i--) {
 -		temp = term.line[i];
 -		term.line[i] = term.line[i-n];
 -		term.line[i-n] = temp;
++	/* Ensure that lines are allocated */
++	for (i = -n; i < 0; i++) {
++		TLINE(i) = ensureline(TLINE(i));
+ 	}
+ 
 +	/* Shift non-scrolling areas in ring buffer */
 +	for (i = term.bot+1; i < term.row; i++) {
 +		temp = TLINE(i);
@@ -318,8 +319,8 @@ index 91243c2..94be87d 100644
 +		temp = TLINE(i);
 +		TLINE(i) = TLINE(i-n);
 +		TLINE(i-n) = temp;
- 	}
- 
++	}
++
 +	/* Scroll buffer */
 +	TSCREEN.cur = (TSCREEN.cur + TSCREEN.size - n) % TSCREEN.size;
 +	/* Clear lines that have entered the view */
@@ -335,15 +336,16 @@ index 91243c2..94be87d 100644
  
 -	tclearregion(0, orig, term.col-1, orig+n-1);
 -	tsetdirt(orig+n, term.bot);
-+	/* Ensure that lines are allocated */
-+	for (i = term.row; i < term.row + n; i++) {
-+		TLINE(i) = ensureline(TLINE(i));
-+	}
- 
+-
 -	for (i = orig; i <= term.bot-n; i++) {
 -		temp = term.line[i];
 -		term.line[i] = term.line[i+n];
 -		term.line[i+n] = temp;
++	/* Ensure that lines are allocated */
++	for (i = term.row; i < term.row + n; i++) {
++		TLINE(i) = ensureline(TLINE(i));
+ 	}
+ 
 +	/* Shift non-scrolling areas in ring buffer */
 +	for (i = orig-1; i >= 0; i--) {
 +		temp = TLINE(i);
@@ -354,8 +356,8 @@ index 91243c2..94be87d 100644
 +		temp = TLINE(i);
 +		TLINE(i) = TLINE(i+n);
 +		TLINE(i+n) = temp;
- 	}
- 
++	}
++
 +	/* Scroll buffer */
 +	TSCREEN.cur = (TSCREEN.cur + n) % TSCREEN.size;
 +	/* Clear lines that have entered the view */
@@ -365,7 +367,7 @@ index 91243c2..94be87d 100644
  	selscroll(orig, -n);
  }
  
-@@ -1236,6 +1326,7 @@ tsetchar(Rune u, const Glyph *attr, int x, int y)
+@@ -1239,6 +1329,7 @@ tsetchar(Rune u, const Glyph *attr, int x, int y)
  		"⎻", "─", "⎼", "⎽", "├", "┤", "┴", "┬", /* p - w */
  		"│", "≤", "≥", "π", "≠", "£", "·", /* x - ~ */
  	};
@@ -373,7 +375,7 @@ index 91243c2..94be87d 100644
  
  	/*
  	 * The table is proudly stolen from rxvt.
-@@ -1244,25 +1335,25 @@ tsetchar(Rune u, const Glyph *attr, int x, int y)
+@@ -1247,25 +1338,25 @@ tsetchar(Rune u, const Glyph *attr, int x, int y)
  	   BETWEEN(u, 0x41, 0x7e) && vt100_0[u - 0x41])
  		utf8decode(vt100_0[u - 0x41], &u, UTF_SIZ);
  
@@ -408,7 +410,7 @@ index 91243c2..94be87d 100644
  	Glyph *gp;
  
  	if (x1 > x2)
-@@ -1270,15 +1361,16 @@ tclearregion(int x1, int y1, int x2, int y2)
+@@ -1273,15 +1364,16 @@ tclearregion(int x1, int y1, int x2, int y2)
  	if (y1 > y2)
  		temp = y1, y1 = y2, y2 = temp;
  
@@ -428,7 +430,7 @@ index 91243c2..94be87d 100644
  			if (selected(x, y))
  				selclear();
  			gp->fg = term.c.attr.fg;
-@@ -1286,6 +1378,7 @@ tclearregion(int x1, int y1, int x2, int y2)
+@@ -1289,6 +1381,7 @@ tclearregion(int x1, int y1, int x2, int y2)
  			gp->mode = 0;
  			gp->u = ' ';
  		}
@@ -436,7 +438,7 @@ index 91243c2..94be87d 100644
  	}
  }
  
-@@ -1300,7 +1393,7 @@ tdeletechar(int n)
+@@ -1303,7 +1396,7 @@ tdeletechar(int n)
  	dst = term.c.x;
  	src = term.c.x + n;
  	size = term.col - src;
@@ -445,7 +447,7 @@ index 91243c2..94be87d 100644
  
  	memmove(&line[dst], &line[src], size * sizeof(Glyph));
  	tclearregion(term.col-n, term.c.y, term.col-1, term.c.y);
-@@ -1317,7 +1410,7 @@ tinsertblank(int n)
+@@ -1320,7 +1413,7 @@ tinsertblank(int n)
  	dst = term.c.x + n;
  	src = term.c.x;
  	size = term.col - dst;
@@ -454,7 +456,7 @@ index 91243c2..94be87d 100644
  
  	memmove(&line[dst], &line[src], size * sizeof(Glyph));
  	tclearregion(src, term.c.y, dst - 1, term.c.y);
-@@ -2111,7 +2204,7 @@ tdumpline(int n)
+@@ -2124,7 +2217,7 @@ tdumpline(int n)
  	char buf[UTF_SIZ];
  	const Glyph *bp, *end;
  
@@ -463,7 +465,7 @@ index 91243c2..94be87d 100644
  	end = &bp[MIN(tlinelen(n), term.col) - 1];
  	if (bp != end || bp->u != ' ') {
  		for ( ; bp <= end; ++bp)
-@@ -2494,11 +2587,11 @@ check_control_code:
+@@ -2511,11 +2604,11 @@ check_control_code:
  	if (selected(term.c.x, term.c.y))
  		selclear();
  
@@ -476,17 +478,17 @@ index 91243c2..94be87d 100644
 +		gp = &TLINE(term.c.y)[term.c.x];
  	}
  
- 	if (IS_SET(MODE_INSERT) && term.c.x+width < term.col)
-@@ -2506,7 +2599,7 @@ check_control_code:
- 
- 	if (term.c.x+width > term.col) {
- 		tnewline(1);
+ 	if (IS_SET(MODE_INSERT) && term.c.x+width < term.col) {
+@@ -2528,7 +2621,7 @@ check_control_code:
+ 			tnewline(1);
+ 		else
+ 			tmoveto(term.col - width, term.c.y);
 -		gp = &term.line[term.c.y][term.c.x];
 +		gp = &TLINE(term.c.y)[term.c.x];
  	}
  
  	tsetchar(u, &term.c.attr, term.c.x, term.c.y);
-@@ -2537,6 +2630,11 @@ twrite(const char *buf, int buflen, int show_ctrl)
+@@ -2559,6 +2652,11 @@ twrite(const char *buf, int buflen, int show_ctrl)
  	Rune u;
  	int n;
  
@@ -498,7 +500,7 @@ index 91243c2..94be87d 100644
  	for (n = 0; n < buflen; n += charsize) {
  		if (IS_SET(MODE_UTF8)) {
  			/* process a complete utf8 char */
-@@ -2563,56 +2661,85 @@ twrite(const char *buf, int buflen, int show_ctrl)
+@@ -2585,56 +2683,85 @@ twrite(const char *buf, int buflen, int show_ctrl)
  }
  
  void
@@ -550,7 +552,11 @@ index 91243c2..94be87d 100644
 +	/* Shift buffer to keep the cursor where we expect it */
 +	if (row <= term.c.y) {
 +		term.screen[0].cur = (term.screen[0].cur - row + term.c.y + 1) % term.screen[0].size;
-+	}
+ 	}
+-	/* ensure that both src and dst are not NULL */
+-	if (i > 0) {
+-		memmove(term.line, term.line + i, row * sizeof(Line));
+-		memmove(term.alt, term.alt + i, row * sizeof(Line));
 +
 +	/* Resize and clear line buffers as needed */
 +	if (linelen > term.linelen) {
@@ -565,10 +571,9 @@ index 91243c2..94be87d 100644
 +			clearline(term.screen[1].buffer[i], term.c.attr, term.linelen, linelen);
 +		}
  	}
--	/* ensure that both src and dst are not NULL */
--	if (i > 0) {
--		memmove(term.line, term.line + i, row * sizeof(Line));
--		memmove(term.alt, term.alt + i, row * sizeof(Line));
+-	for (i += row; i < term.row; i++) {
+-		free(term.line[i]);
+-		free(term.alt[i]);
 +	/* Allocate all visible lines for regular line buffer */
 +	for (j = term.screen[0].cur, i = 0; i < row; ++i, j = (j + 1) % term.screen[0].size)
 +	{
@@ -578,10 +583,7 @@ index 91243c2..94be87d 100644
 +		if (i >= term.row) {
 +			clearline(term.screen[0].buffer[j], term.c.attr, 0, linelen);
 +		}
- 	}
--	for (i += row; i < term.row; i++) {
--		free(term.line[i]);
--		free(term.alt[i]);
++	}
 +	/* Resize alt screen */
 +	term.screen[1].cur = 0;
 +	term.screen[1].size = row;
@@ -615,7 +617,7 @@ index 91243c2..94be87d 100644
  	if (col > term.col) {
  		bp = term.tabs + term.col;
  
-@@ -2622,26 +2749,16 @@ tresize(int col, int row)
+@@ -2644,26 +2771,16 @@ tresize(int col, int row)
  		for (bp += tabspaces; bp < term.tabs + col; bp += tabspaces)
  			*bp = 1;
  	}
@@ -645,7 +647,7 @@ index 91243c2..94be87d 100644
  }
  
  void
-@@ -2653,14 +2770,15 @@ resettitle(void)
+@@ -2675,14 +2792,15 @@ resettitle(void)
  void
  drawregion(int x1, int y1, int x2, int y2)
  {
@@ -667,7 +669,7 @@ index 91243c2..94be87d 100644
  	}
  }
  
-@@ -2675,14 +2793,15 @@ draw(void)
+@@ -2697,14 +2815,15 @@ draw(void)
  	/* adjust cursor position */
  	LIMIT(term.ocx, 0, term.col-1);
  	LIMIT(term.ocy, 0, term.row-1);
@@ -687,7 +689,7 @@ index 91243c2..94be87d 100644
  	term.ocx = cx;
  	term.ocy = term.c.y;
  	xfinishdraw();
-@@ -2763,7 +2882,7 @@ copyurl(const Arg *arg) {
+@@ -2785,7 +2904,7 @@ copyurl(const Arg *arg) {
  		** we hit previous occurrence of URL
  		*/
  		for (col = colend; col--;)
@@ -709,7 +711,7 @@ index 32bf7a8..8471441 100644
  enum glyph_attribute {
  	ATTR_NULL       = 0,
 diff --git a/x.c b/x.c
-index c9a8aa3..87cb267 100644
+index 31cd130..ab2e244 100644
 --- a/x.c
 +++ b/x.c
 @@ -60,6 +60,8 @@ static void zoom(const Arg *);
