@@ -24,6 +24,7 @@ patch: clean
 	@for patch in $(PATCHES); do                                                                            \
 	    echo "Applying patch: $${patch}";                                                                   \
 	    patch --directory "$(UPSTREAM_DIR)" --input "$${patch}" --no-backup-if-mismatch --quiet || exit -1; \
+	    git -C '$(UPSTREAM_DIR)' diff > "$${patch}";                                                        \
 	    git -C '$(UPSTREAM_DIR)' add .;                                                                     \
 	done
 

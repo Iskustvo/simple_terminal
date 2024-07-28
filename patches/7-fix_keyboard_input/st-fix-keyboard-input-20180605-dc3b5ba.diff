@@ -1,12 +1,8 @@
-Author: Jan Christoph Ebersbach <jceb@e-jc.de>
-URL: http://st.suckless.org/patches/fix_keyboard_input
-Fix keyboard input on terminal
-
-Index: st-patches/st/config.def.h
-===================================================================
+diff --git a/config.def.h b/config.def.h
+index 63e2f88..26c0e3f 100644
 --- a/config.def.h
 +++ b/config.def.h
-@@ -209,7 +209,80 @@ Shortcut shortcuts[] = {
+@@ -234,7 +234,80 @@ static Shortcut shortcuts[] = {
   * If you want keys other than the X11 function keys (0xFD00 - 0xFFFF)
   * to be mapped below, add them to this array.
   */
@@ -88,7 +84,7 @@ Index: st-patches/st/config.def.h
  
  /*
   * State bits to ignore when matching key or button events.  By default,
-@@ -232,59 +305,20 @@ static Key key[] = {
+@@ -250,59 +323,20 @@ static Key key[] = {
  	/* keysym           mask            string      appkey appcursor */
  	{ XK_KP_Home,       ShiftMask,      "\033[2J",       0,   -1},
  	{ XK_KP_Home,       ShiftMask,      "\033[1;2H",     0,   +1},
@@ -148,7 +144,8 @@ Index: st-patches/st/config.def.h
  	{ XK_Up,            ShiftMask,      "\033[1;2A",     0,    0},
  	{ XK_Up,            Mod1Mask,       "\033[1;3A",     0,    0},
  	{ XK_Up,         ShiftMask|Mod1Mask,"\033[1;4A",     0,    0},
-@@ -323,35 +356,26 @@ static Key key[] = {
+@@ -341,36 +375,27 @@ static Key key[] = {
+ 	{ XK_Right,         XK_ANY_MOD,     "\033OC",        0,   +1},
  	{ XK_ISO_Left_Tab,  ShiftMask,      "\033[Z",        0,    0},
  	{ XK_Return,        Mod1Mask,       "\033\r",        0,    0},
 -	{ XK_Return,        XK_ANY_MOD,     "\r",            0,    0},
@@ -185,7 +182,7 @@ Index: st-patches/st/config.def.h
  	{ XK_F1,            XK_NO_MOD,      "\033OP" ,       0,    0},
  	{ XK_F1, /* F13 */  ShiftMask,      "\033[1;2P",     0,    0},
  	{ XK_F1, /* F25 */  ControlMask,    "\033[1;5P",     0,    0},
-@@ -438,6 +462,572 @@ static Key key[] = {
+@@ -457,6 +482,572 @@ static Key key[] = {
  	{ XK_F33,           XK_NO_MOD,      "\033[20;5~",    0,    0},
  	{ XK_F34,           XK_NO_MOD,      "\033[21;5~",    0,    0},
  	{ XK_F35,           XK_NO_MOD,      "\033[23;5~",    0,    0},

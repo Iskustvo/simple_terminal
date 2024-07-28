@@ -1,9 +1,9 @@
 diff --git a/config.def.h b/config.def.h
-index 6185e96..bb15c28 100644
+index 8e6ccbd..63e2f88 100644
 --- a/config.def.h
 +++ b/config.def.h
-@@ -204,6 +204,8 @@ static Shortcut shortcuts[] = {
- 	{ MODKEY,               XK_l,           copyurl,        {.i =  0} },
+@@ -205,6 +205,8 @@ static Shortcut shortcuts[] = {
+ 	{ MODKEY|ShiftMask,     XK_L,           copyurl,        {.i =  1} },
  	{ TERMMOD,              XK_Return,      newterm,        {.i =  0} },
  	{ MODKEY,               XK_o,           opencopied,     {.v = "xdg-open"} },
 +	{ ShiftMask,            XK_Page_Up,     kscrollup,      {.i = -1} },
@@ -12,7 +12,7 @@ index 6185e96..bb15c28 100644
  
  /*
 diff --git a/st.c b/st.c
-index fc582b3..63f1671 100644
+index 9a7d96a..2aa5bcb 100644
 --- a/st.c
 +++ b/st.c
 @@ -45,6 +45,10 @@ extern char *argv0;
@@ -293,7 +293,7 @@ index fc582b3..63f1671 100644
  void
  newterm(const Arg* a)
  {
-@@ -1104,15 +1166,29 @@ tscrolldown(int orig, int n)
+@@ -1106,15 +1168,29 @@ tscrolldown(int orig, int n)
  
  	LIMIT(n, 0, term.bot-orig+1);
  
@@ -330,7 +330,7 @@ index fc582b3..63f1671 100644
  	selscroll(orig, n);
  }
  
-@@ -1124,15 +1200,29 @@ tscrollup(int orig, int n)
+@@ -1126,15 +1202,29 @@ tscrollup(int orig, int n)
  
  	LIMIT(n, 0, term.bot-orig+1);
  
@@ -367,7 +367,7 @@ index fc582b3..63f1671 100644
  	selscroll(orig, -n);
  }
  
-@@ -1239,6 +1329,7 @@ tsetchar(Rune u, const Glyph *attr, int x, int y)
+@@ -1241,6 +1331,7 @@ tsetchar(Rune u, const Glyph *attr, int x, int y)
  		"⎻", "─", "⎼", "⎽", "├", "┤", "┴", "┬", /* p - w */
  		"│", "≤", "≥", "π", "≠", "£", "·", /* x - ~ */
  	};
@@ -375,7 +375,7 @@ index fc582b3..63f1671 100644
  
  	/*
  	 * The table is proudly stolen from rxvt.
-@@ -1247,25 +1338,25 @@ tsetchar(Rune u, const Glyph *attr, int x, int y)
+@@ -1249,25 +1340,25 @@ tsetchar(Rune u, const Glyph *attr, int x, int y)
  	   BETWEEN(u, 0x41, 0x7e) && vt100_0[u - 0x41])
  		utf8decode(vt100_0[u - 0x41], &u, UTF_SIZ);
  
@@ -410,7 +410,7 @@ index fc582b3..63f1671 100644
  	Glyph *gp;
  
  	if (x1 > x2)
-@@ -1273,15 +1364,16 @@ tclearregion(int x1, int y1, int x2, int y2)
+@@ -1275,15 +1366,16 @@ tclearregion(int x1, int y1, int x2, int y2)
  	if (y1 > y2)
  		temp = y1, y1 = y2, y2 = temp;
  
@@ -430,7 +430,7 @@ index fc582b3..63f1671 100644
  			if (selected(x, y))
  				selclear();
  			gp->fg = term.c.attr.fg;
-@@ -1289,6 +1381,7 @@ tclearregion(int x1, int y1, int x2, int y2)
+@@ -1291,6 +1383,7 @@ tclearregion(int x1, int y1, int x2, int y2)
  			gp->mode = 0;
  			gp->u = ' ';
  		}
@@ -438,7 +438,7 @@ index fc582b3..63f1671 100644
  	}
  }
  
-@@ -1303,7 +1396,7 @@ tdeletechar(int n)
+@@ -1305,7 +1398,7 @@ tdeletechar(int n)
  	dst = term.c.x;
  	src = term.c.x + n;
  	size = term.col - src;
@@ -447,7 +447,7 @@ index fc582b3..63f1671 100644
  
  	memmove(&line[dst], &line[src], size * sizeof(Glyph));
  	tclearregion(term.col-n, term.c.y, term.col-1, term.c.y);
-@@ -1320,7 +1413,7 @@ tinsertblank(int n)
+@@ -1322,7 +1415,7 @@ tinsertblank(int n)
  	dst = term.c.x + n;
  	src = term.c.x;
  	size = term.col - dst;
@@ -456,7 +456,7 @@ index fc582b3..63f1671 100644
  
  	memmove(&line[dst], &line[src], size * sizeof(Glyph));
  	tclearregion(src, term.c.y, dst - 1, term.c.y);
-@@ -2124,7 +2217,7 @@ tdumpline(int n)
+@@ -2126,7 +2219,7 @@ tdumpline(int n)
  	char buf[UTF_SIZ];
  	const Glyph *bp, *end;
  
@@ -465,7 +465,7 @@ index fc582b3..63f1671 100644
  	end = &bp[MIN(tlinelen(n), term.col) - 1];
  	if (bp != end || bp->u != ' ') {
  		for ( ; bp <= end; ++bp)
-@@ -2511,11 +2604,11 @@ check_control_code:
+@@ -2513,11 +2606,11 @@ check_control_code:
  	if (selected(term.c.x, term.c.y))
  		selclear();
  
@@ -479,7 +479,7 @@ index fc582b3..63f1671 100644
  	}
  
  	if (IS_SET(MODE_INSERT) && term.c.x+width < term.col) {
-@@ -2528,7 +2621,7 @@ check_control_code:
+@@ -2530,7 +2623,7 @@ check_control_code:
  			tnewline(1);
  		else
  			tmoveto(term.col - width, term.c.y);
@@ -488,7 +488,7 @@ index fc582b3..63f1671 100644
  	}
  
  	tsetchar(u, &term.c.attr, term.c.x, term.c.y);
-@@ -2559,6 +2652,11 @@ twrite(const char *buf, int buflen, int show_ctrl)
+@@ -2561,6 +2654,11 @@ twrite(const char *buf, int buflen, int show_ctrl)
  	Rune u;
  	int n;
  
@@ -500,7 +500,7 @@ index fc582b3..63f1671 100644
  	for (n = 0; n < buflen; n += charsize) {
  		if (IS_SET(MODE_UTF8)) {
  			/* process a complete utf8 char */
-@@ -2585,56 +2683,85 @@ twrite(const char *buf, int buflen, int show_ctrl)
+@@ -2587,56 +2685,85 @@ twrite(const char *buf, int buflen, int show_ctrl)
  }
  
  void
@@ -617,7 +617,7 @@ index fc582b3..63f1671 100644
  	if (col > term.col) {
  		bp = term.tabs + term.col;
  
-@@ -2644,26 +2771,16 @@ tresize(int col, int row)
+@@ -2646,26 +2773,16 @@ tresize(int col, int row)
  		for (bp += tabspaces; bp < term.tabs + col; bp += tabspaces)
  			*bp = 1;
  	}
@@ -647,7 +647,7 @@ index fc582b3..63f1671 100644
  }
  
  void
-@@ -2675,14 +2792,15 @@ resettitle(void)
+@@ -2677,14 +2794,15 @@ resettitle(void)
  void
  drawregion(int x1, int y1, int x2, int y2)
  {
@@ -669,7 +669,7 @@ index fc582b3..63f1671 100644
  	}
  }
  
-@@ -2697,14 +2815,15 @@ draw(void)
+@@ -2699,14 +2817,15 @@ draw(void)
  	/* adjust cursor position */
  	LIMIT(term.ocx, 0, term.col-1);
  	LIMIT(term.ocy, 0, term.row-1);
@@ -689,7 +689,7 @@ index fc582b3..63f1671 100644
  	term.ocx = cx;
  	term.ocy = term.c.y;
  	xfinishdraw();
-@@ -2785,7 +2904,7 @@ copyurl(const Arg *arg) {
+@@ -2787,7 +2906,7 @@ copyurl(const Arg *arg) {
  		** we hit previous occurrence of URL
  		*/
  		for (col = colend; col--;)
@@ -711,7 +711,7 @@ index 32bf7a8..8471441 100644
  enum glyph_attribute {
  	ATTR_NULL       = 0,
 diff --git a/x.c b/x.c
-index 31cd130..ab2e244 100644
+index e0f8ed3..87740f0 100644
 --- a/x.c
 +++ b/x.c
 @@ -60,6 +60,8 @@ static void zoom(const Arg *);

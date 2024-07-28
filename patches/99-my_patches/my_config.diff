@@ -1,5 +1,5 @@
 diff --git a/config.def.h b/config.def.h
-index 91ab8ca..da383c9 100644
+index 26c0e3f..279fa19 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -5,8 +5,8 @@
@@ -103,7 +103,7 @@ index 91ab8ca..da383c9 100644
  /*
   * Default columns and rows numbers
 diff --git a/st.info b/st.info
-index 8201ad6..e2ab6c1 100644
+index efab2cf..9966620 100644
 --- a/st.info
 +++ b/st.info
 @@ -47,7 +47,7 @@ st-mono| simpleterm monocolor,

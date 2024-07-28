@@ -1,20 +1,8 @@
-From 37567786b543aacd172c7cd095ce862568ca46f0 Mon Sep 17 00:00:00 2001
-From: Iskustvo <iskustvo@yahoo.com>
-Date: Sat, 7 Jan 2023 03:37:22 +0100
-Subject: [PATCH] add glyph wide support patch
-
----
- st.c  |   3 +-
- st.h  |   6 +++
- win.h |   2 +-
- x.c   | 141 ++++++++++++++++++++++++++++++----------------------------
- 4 files changed, 81 insertions(+), 71 deletions(-)
-
 diff --git a/st.c b/st.c
-index d756be1..e6ea1a0 100644
+index 2aa5bcb..a93b6f7 100644
 --- a/st.c
 +++ b/st.c
-@@ -2801,7 +2801,8 @@ draw(void)
+@@ -2825,7 +2825,8 @@ draw(void)
  	drawregion(0, 0, term.col, term.row);
  	if (TSCREEN.off == 0)
  		xdrawcursor(cx, term.c.y, TLINE(term.c.y)[cx],
@@ -55,7 +43,7 @@ index 6de960d..94679e4 100644
  void xfinishdraw(void);
  void xloadcols(void);
 diff --git a/x.c b/x.c
-index cd4bd94..b8c4d93 100644
+index 87740f0..631bac2 100644
 --- a/x.c
 +++ b/x.c
 @@ -145,7 +145,7 @@ typedef struct {
@@ -94,33 +82,6 @@ index cd4bd94..b8c4d93 100644
 -		xclear(winx, 0, winx + width, borderpx);
 -	if (winy + win.ch >= borderpx + win.th)
 -		xclear(winx, winy + win.ch, winx + width, win.h);
--
--	/* Clean up the region we want to draw to. */
--	XftDrawRect(xw.draw, bg, winx, winy, width, win.ch);
--
--	/* Set the clip region because Xft is sometimes dirty. */
--	r.x = 0;
--	r.y = 0;
--	r.height = win.ch;
--	r.width = width;
--	XftDrawSetClipRectangles(xw.draw, winx, winy, &r, 1);
--
--	/* Render the glyphs. */
--	XftDrawGlyphFontSpec(xw.draw, fg, specs, len);
--
--	/* Render underline and strikethrough. */
--	if (base.mode & ATTR_UNDERLINE) {
--		XftDrawRect(xw.draw, fg, winx, winy + dc.font.ascent * chscale + 1,
--				width, 1);
--	}
--
--	if (base.mode & ATTR_STRUCK) {
--		XftDrawRect(xw.draw, fg, winx, winy + 2 * dc.font.ascent * chscale / 3,
--				width, 1);
--	}
--
--	/* Reset clip to none. */
--	XftDrawSetClip(xw.draw, 0);
 +    if (dmode & DRAW_BG) {
 +        /* Intelligent cleaning up of the borders. */
 +        if (x == 0) {
@@ -139,17 +100,41 @@ index cd4bd94..b8c4d93 100644
 +        /* Fill the background */
 +        XftDrawRect(xw.draw, bg, winx, winy, width, win.ch);
 +    }
-+
+ 
+-	/* Clean up the region we want to draw to. */
+-	XftDrawRect(xw.draw, bg, winx, winy, width, win.ch);
 +    if (dmode & DRAW_FG) {
 +        /* Render the glyphs. */
 +        XftDrawGlyphFontSpec(xw.draw, fg, specs, len);
-+
+ 
+-	/* Set the clip region because Xft is sometimes dirty. */
+-	r.x = 0;
+-	r.y = 0;
+-	r.height = win.ch;
+-	r.width = width;
+-	XftDrawSetClipRectangles(xw.draw, winx, winy, &r, 1);
 +        /* Render underline and strikethrough. */
 +        if (base.mode & ATTR_UNDERLINE) {
 +            XftDrawRect(xw.draw, fg, winx, winy + dc.font.ascent + 1,
 +                        width, 1);
 +        }
-+
+ 
+-	/* Render the glyphs. */
+-	XftDrawGlyphFontSpec(xw.draw, fg, specs, len);
+-
+-	/* Render underline and strikethrough. */
+-	if (base.mode & ATTR_UNDERLINE) {
+-		XftDrawRect(xw.draw, fg, winx, winy + dc.font.ascent * chscale + 1,
+-				width, 1);
+-	}
+-
+-	if (base.mode & ATTR_STRUCK) {
+-		XftDrawRect(xw.draw, fg, winx, winy + 2 * dc.font.ascent * chscale / 3,
+-				width, 1);
+-	}
+-
+-	/* Reset clip to none. */
+-	XftDrawSetClip(xw.draw, 0);
 +        if (base.mode & ATTR_STRUCK) {
 +            XftDrawRect(xw.draw, fg, winx, winy + 2 * dc.font.ascent / 3,
 +                        width, 1);
@@ -184,7 +169,7 @@ index cd4bd94..b8c4d93 100644
  
  	if (IS_SET(MODE_HIDE))
  		return;
-@@ -1662,32 +1658,39 @@ xstartdraw(void)
+@@ -1664,32 +1660,39 @@ xstartdraw(void)
  void
  xdrawline(Line line, int x1, int y1, int x2)
  {
@@ -192,7 +177,8 @@ index cd4bd94..b8c4d93 100644
 +	int i, x, ox, numspecs, numspecs_cached;
  	Glyph base, new;
 -	XftGlyphFontSpec *specs = xw.specbuf;
--
++	XftGlyphFontSpec *specs;
+ 
 -	numspecs = xmakeglyphfontspecs(specs, &line[x1], x2 - x1, x1, y1);
 -	i = ox = 0;
 -	for (x = x1; x < x2 && i < numspecs; x++) {
@@ -206,12 +192,6 @@ index cd4bd94..b8c4d93 100644
 -			specs += i;
 -			numspecs -= i;
 -			i = 0;
--		}
--		if (i == 0) {
--			ox = x;
--			base = new;
-+	XftGlyphFontSpec *specs;
-+
 +	numspecs_cached = xmakeglyphfontspecs(xw.specbuf, &line[x1], x2 - x1, x1, y1);
 +
 +	/* Draw line in 2 passes: background and foreground. This way wide glyphs
@@ -238,6 +218,10 @@ index cd4bd94..b8c4d93 100644
 +			}
 +			i++;
  		}
+-		if (i == 0) {
+-			ox = x;
+-			base = new;
+-		}
 -		i++;
 +		if (i > 0)
 +			xdrawglyphfontspecs(specs, base, i, ox, y1, dmode);
@@ -247,6 +231,3 @@ index cd4bd94..b8c4d93 100644
  }
  
  void
--- 
-2.39.0
-
