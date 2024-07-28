@@ -3,6 +3,17 @@ PATCHES = $(shell find "$$(realpath patches)" -type f | sort)
 
 .PHONY: all st patch clean get_upstream_patch
 
+define error_message_for_getting_upstream_patch
+[1;31m Invalid use of "get_upstream_patch"!
+[0;33m"get_upstream_patch" is a Make target, not a Make variable, so use it as following:
+[0;32m    make get_upstream_patch LINK=https://st.suckless.org/patches/[patch_directory]/[patch_file]
+[0m
+endef
+
+ifdef get_upstream_patch
+$(error $(error_message_for_getting_upstream_patch))
+endif
+
 all: st
 
 st: patch
