@@ -30,7 +30,8 @@ patch: clean
 
 clean:
 	@echo 'Cleaning upstream directory'
-	@cd $(UPSTREAM_DIR) && git reset --hard --quiet && git clean -dfq
+	@git -C '$(UPSTREAM_DIR)' reset --hard --quiet
+	@git -C '$(UPSTREAM_DIR)' clean -dffq
 
 # Target used for smart downloading of upstream patches into current setup.
 #
