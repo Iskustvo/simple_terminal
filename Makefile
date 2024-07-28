@@ -6,7 +6,7 @@ PATCHES = $(shell find "$$(realpath patches)" -type f | sort)
 define error_message_for_getting_upstream_patch
 [1;31m Invalid use of "get_upstream_patch"!
 [0;33m"get_upstream_patch" is a Make target, not a Make variable, so use it as following:
-[0;32m    make get_upstream_patch LINK=https://st.suckless.org/patches/[patch_directory]/[patch_file]
+[0;32m    make get_upstream_patch URL=https://st.suckless.org/patches/[patch_directory]/[patch_file]
 [0m
 endef
 
@@ -32,7 +32,7 @@ clean:
 	@cd $(UPSTREAM_DIR) && git reset --hard --quiet && git clean -dfq
 
 get_upstream_patch:
-	@PATCH_NAME="$$(echo '$(LINK)'                                                                                     \
+	@PATCH_NAME="$$(echo '$(URL)'                                                                                      \
 	                | sed -n '/https:\/\/st.suckless.org\/patches\/[^ /]\+\/[^ /]\+/                                   \
 	                          {                                                                                        \
 	                              s|.*/\([^ /]\+\)/[^ /]\+$$|\1|;                                                      \
@@ -41,7 +41,7 @@ get_upstream_patch:
 	                                                                                                                   \
 	if [ -z "$${PATCH_NAME}" ]; then                                                                                   \
 	    printf '%s\n%s\n'                                                                                              \
-	           'Invalid value of variable LINK: $(LINK)'                                                               \
+	           'Invalid value of variable URL: $(URL)'                                                                 \
 	           'It must be in format https://st.suckless.org/patches/[patch_directory]/[patch_file]' >& 2;             \
 	    exit 1;                                                                                                        \
 	fi;                                                                                                                \
@@ -57,7 +57,7 @@ get_upstream_patch:
 	                      | head -n 1                                                                                  \
 	                      | cut -d '-' -f 1)";                                                                         \
 	PATCH_DIRECTORY="patches/$$(( $${LAST_PATCH_NUMBER} + 1 ))-$${PATCH_NAME}";                                        \
-	PATCH_FILE="$${PATCH_DIRECTORY}/1-$$(basename $(LINK))";                                                           \
+	PATCH_FILE="$${PATCH_DIRECTORY}/1-$$(basename $(URL))";                                                            \
 	                                                                                                                   \
 	mkdir -p "$${PATCH_DIRECTORY}";                                                                                    \
-	wget --output-document "$${PATCH_FILE}" --quiet '$(LINK)';
+	wget --output-document "$${PATCH_FILE}" --quiet '$(URL)';
